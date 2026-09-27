@@ -1,0 +1,18 @@
+[Unit]
+Description=Каскадный сплит-роутинг для AWG0
+After=awg-quick@awg0.service awg-quick@awg1.service network-online.target
+Requires=awg-quick@awg0.service awg-quick@awg1.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/root/awg/awg-routing.sh
+# TimeoutStartSec здесь намеренно НЕ задан. У Type=oneshot таймаут запуска по умолчанию
+# отключён (проверено: systemctl show -p TimeoutStartUSec на таком юните отдаёт infinity,
+# тогда как у Type=simple там менеджерские 90 секунд). Поэтому ожидание блокировки до 5 минут
+# и медленная заливка списка на слабой машине юнит не убивают, а любое конечное значение,
+# наоборот, ввело бы убийство на середине и оставило деление применённым наполовину.
+
+[Install]
+WantedBy=multi-user.target
